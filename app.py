@@ -11,7 +11,6 @@ app = Flask(__name__)
 API_KEY = "0e873405fb1221fdf1c2478212d6bb44"
 CIDADE = "Blumenau,BR"
 WEATHER_URL = f"http://api.openweathermap.org/data/2.5/weather?q={CIDADE}&appid={API_KEY}&units=metric&lang=pt_br"
-FORECAST_URL = f"http://api.openweathermap.org/data/2.5/forecast?q={CIDADE}&appid={API_KEY}&units=metric&lang=pt_br"
 CACHE_FILE = "weather_cache.json"
 CACHE_DURATION = 600  # 10 minutos em segundos
 
@@ -42,26 +41,11 @@ def get_weather_data():
                 'umidade': weather_data['main']['humidity'],
                 'vento': weather_data['wind']['speed'] * 3.6  # Convertendo m/s para km/h
             }
-            # Dados de previsão (primeiras 5 horas como exemplo)
-            forecast_response = requests.get(FORECAST_URL)
-            forecast_response.raise_for_status()
-            forecast_data = forecast_response.json()
-            hourly_forecast = [
-                {
-                    'hora': entry['dt_txt'].split()[1][:5],  # Formato HH:MM
-                    'temp': entry['main']['temp'],
-                    'descricao': entry['weather'][0]['description']
-                }
-                for entry in forecast_data['list'][:5]  # Primeiras 5 horas
-            ]
 
             # Salva os dados no cache
             cache_data = {
                 'timestamp': time.time(),
-                'data': {
-                    **current_data,
-                    'hourly_forecast': hourly_forecast
-                }
+                'data': current_data
             }
             with open(CACHE_FILE, 'w') as f:
                 json.dump(cache_data, f)
@@ -82,8 +66,7 @@ def index():
                          cidade=weather_data['cidade'],
                          sensacao=weather_data['sensacao'],
                          umidade=weather_data['umidade'],
-                         vento=weather_data['vento'],
-                         hourly_forecast=weather_data.get('hourly_forecast', []))
+                         vento=weather_data['vento'])
 
 if __name__ == '__main__':
     port = int(os.getenv("PORT", 5000))  # Usa a porta fornecida pelo Render ou 5000 como padrão

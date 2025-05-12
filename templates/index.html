@@ -29,7 +29,7 @@
         }
     </style>
 </head>
-<body class="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+<body class="min-h-screen bg-gray-100 flex items-center justify-center p-4" id="body">
     <div class="max-w-md w-full weather-card opacity-0">
         <div class="gradient-bg rounded-3xl shadow-2xl overflow-hidden text-white">
             <!-- Cabeçalho com localização -->
@@ -45,8 +45,8 @@
                         </h1>
                         <p id="current-date" class="text-sm opacity-80"></p>
                     </div>
-                    <button id="refresh-btn" class="p-2 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 transition">
-                        <i class="fas fa-sync-alt"></i>
+                    <button id="theme-toggle-btn" class="p-2 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 transition">
+                        <i class="fas fa-moon"></i>
                     </button>
                 </div>
             </div>
@@ -70,7 +70,7 @@
                     </p>
                 </div>
                 <div class="weather-icon">
-                    <i id="weather-icon" class="fas fa-cloud-sun text-7xl"></i>
+                    <i id="weather-icon" class="fas fa-cloud-sun text-9xl"></i>
                 </div>
             </div>
             
@@ -109,19 +109,6 @@
                     </div>
                 </div>
             </div>
-            
-            <!-- Previsão para as próximas horas -->
-            <div class="px-6 py-4">
-                <h3 class="text-sm font-semibold opacity-90 mb-2">PRÓXIMAS HORAS</h3>
-                <div class="flex overflow-x-auto pb-2 space-x-4" id="hourly-forecast">
-                    <!-- Para adicionar previsão horária, você precisará usar o endpoint /forecast da OpenWeatherMap -->
-                    <div class="text-center px-2">
-                        <div class="text-sm">--:--</div>
-                        <i class="fas fa-question text-xl my-1"></i>
-                        <div class="font-medium">--°</div>
-                    </div>
-                </div>
-            </div>
         </div>
         
         <!-- Créditos -->
@@ -145,7 +132,7 @@
                 'poucas nuvens': 'fas fa-cloud-sun text-yellow-200',
                 'nuvens dispersas': 'fas fa-cloud text-gray-300',
                 'nuvens quebradas': 'fas fa-cloud text-gray-400',
-                'nublado': 'fas fa-cloud text-gray-400',  // Adicionado para corresponder à imagem
+                'nublado': 'fas fa-cloud text-gray-400',
                 'chuva leve': 'fas fa-cloud-sun-rain text-blue-300',
                 'chuva': 'fas fa-cloud-rain text-blue-300',
                 'chuva forte': 'fas fa-cloud-showers-heavy text-blue-300',
@@ -157,7 +144,7 @@
             return iconMap[description.toLowerCase()] || 'fas fa-cloud text-gray-400';
         }
         
-        // Atualizar ícone com base na descrição
+        // Alternar modo claro/escuro
         document.addEventListener('DOMContentLoaded', () => {
             updateCurrentDate();
             
@@ -165,15 +152,34 @@
             const weatherIcon = document.getElementById('weather-icon');
             weatherIcon.className = getWeatherIcon(descriptionElement);
             
-            // Configurar botão de atualização
-            document.getElementById('refresh-btn').addEventListener('click', () => {
-                const card = document.querySelector('.weather-card');
-                card.style.animation = 'none';
-                void card.offsetWidth; // Trigger reflow
-                card.style.animation = 'fadeIn 0.8s ease-out forwards';
-                
-                // Atualizar a página
-                window.location.reload();
+            // Configurar botão de alternância de tema
+            const themeToggleBtn = document.getElementById('theme-toggle-btn');
+            const body = document.getElementById('body');
+            const icon = themeToggleBtn.querySelector('i');
+            
+            // Verificar o tema salvo no localStorage
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                body.classList.remove('bg-gray-100');
+                body.classList.add('bg-gray-900');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+
+            themeToggleBtn.addEventListener('click', () => {
+                if (body.classList.contains('bg-gray-100')) {
+                    body.classList.remove('bg-gray-100');
+                    body.classList.add('bg-gray-900');
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    body.classList.remove('bg-gray-900');
+                    body.classList.add('bg-gray-100');
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                    localStorage.setItem('theme', 'light');
+                }
             });
         });
     </script>
